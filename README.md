@@ -1,5 +1,9 @@
 # docker-registry-curl
 
+This program will allow you to delete image tags that are in a private
+container registry.  Please see [docker's api](https://docs.docker.com/registry/spec/api/) for more details on how
+this is done.
+
 # Example
 ```
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY}"
@@ -8,10 +12,7 @@ echo "Attempting to remove ${DOCKER_ETAG}"
 docker-registry-curl -vsL -X DELETE "https://${DOCKER_REGISTRY}/v2/${DOCKER_PROJECT}/manifests/${DOCKER_ETAG}"
 ```
 
-## Docker Image
-This can be converted into a docker container image - which can be
-useful in a CI/CD environment
-
+# Variables to the application
 | Environmental Variable | Why |
 | --- | --- |
 | DOCKER_USERNAME | The username to authenticate against the registry  |
@@ -20,7 +21,11 @@ useful in a CI/CD environment
 | DOCKER_PROJECT  | The project of the image (_`acmecompany/service-a`_) |
 | DOCKER_TAG      | The tag of the image you want to delete            |
 
-### Example Usage: GitLab CI/CD
+# Docker Image
+This can be converted into a docker container image - which can be
+useful in a CI/CD environment.  Please see the Dockerfile
+
+## Example Usage: GitLab CI/CD
 If you want images in gitlab to be deleted upon failure, a possible
 job could be:
 
