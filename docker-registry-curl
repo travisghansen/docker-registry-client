@@ -35,15 +35,15 @@ main() {
             REALM=$(echo "${DETAILS}" | cut -d ',' -f 1 | cut -d "=" -f 2 | tr -d '"')
             SERVICE=$(echo "${DETAILS}" | cut -d ',' -f 2 | cut -d "=" -f 2 | tr -d '"')
             SCOPE=$(echo "${DETAILS}" | cut -d ',' -f 3 | cut -d "=" -f 2 | tr -d '"')
-            if [ -e ~/.docker/config.json ];then
-                DOCKER_AUTH=$(jq -r ".[\"auths\"][\"${REGISTRY_HOST}\"][\"auth\"]" ~/.docker/config.json | base64 -d)
-            fi
+#            if [ -e ~/.docker/config.json ];then
+#                DOCKER_AUTH=$(jq -r ".[\"auths\"][\"${REGISTRY_HOST}\"][\"auth\"]" ~/.docker/config.json | base64 -d)
+#            fi
             console "${REALM}"
             console "${SERVICE}"
             console "${SCOPE}"
             console "${DOCKER_AUTH}"
             if [ "x" != "x${DOCKER_AUTH}" ];then
-                DOCKER_TOKEN=$(curl -m 10 -u "${DOCKER_AUTH}" "${REALM}?service=${SERVICE}&scope=${SCOPE}" -s 2>/dev/null | jq -r .token | xargs echo)
+                DOCKER_TOKEN=$(curl -m 10 -u "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" "${REALM}?service=${SERVICE}&scope=${SCOPE}" -s 2>/dev/null | jq -r .token | xargs echo)
             fi 
             console "${DOCKER_TOKEN}"
         fi
