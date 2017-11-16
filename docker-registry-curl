@@ -27,30 +27,34 @@ main() {
 
     if [ "x${WWW_AUTHENTICATE}" != "x" ];then
         # we need to get a token
-        TYPE=$(echo "${WWW_AUTHENTICATE}" | cut -d " " -f 1)
+        DOCKER_AUTH_TYPE=$(echo "${WWW_AUTHENTICATE}" | cut -d " " -f 1)
         DETAILS=$(echo "${WWW_AUTHENTICATE}" | cut -d " " -f 2-)
-        console "${TYPE}"
+        console "${DOCKER_AUTH_TYPE}"
+        console "${DETAILS}"
         console "${REGISTRY_HOST}"
-        if [ "${TYPE}" == "Bearer" ];then
+        if [ "${DOCKER_AUTH_TYPE}" == "Bearer" ];then
             REALM=$(echo "${DETAILS}" | cut -d ',' -f 1 | cut -d "=" -f 2 | tr -d '"')
             SERVICE=$(echo "${DETAILS}" | cut -d ',' -f 2 | cut -d "=" -f 2 | tr -d '"')
             SCOPE=$(echo "${DETAILS}" | cut -d ',' -f 3 | cut -d "=" -f 2 | tr -d '"')
-#            if [ -e ~/.docker/config.json ];then
-#                DOCKER_AUTH=$(jq -r ".[\"auths\"][\"${REGISTRY_HOST}\"][\"auth\"]" ~/.docker/config.json | base64 -d)
-#            fi
+            if [ "x${DOCKER_AUTH}" != "x" ];then
+                :
+            elif [[ "x${DOCKER_USERNAME}" != "x" && "x${DOCKER_PASSWORD}" != "x" ]];then
+                DOCKER_AUTH="${DOCKER_USERNAME}:${DOCKER_PASSWORD}"
+            elif [ -e ~/.docker/config.json ];then
+                DOCKER_AUTH=$(jq -r ".[\"auths\"][\"${REGISTRY_HOST}\"][\"auth\"]" ~/.docker/config.json | base64 -d)
+            fi
             console "${REALM}"
             console "${SERVICE}"
             console "${SCOPE}"
             console "${DOCKER_AUTH}"
             if [ "x" != "x${DOCKER_AUTH}" ];then
-                DOCKER_TOKEN=$(curl -m 10 -u "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" "${REALM}?service=${SERVICE}&scope=${SCOPE}" -s 2>/dev/null | jq -r .token | xargs echo)
+                DOCKER_AUTH_TOKEN=$(curl -m 10 -u "${DOCKER_AUTH}" "${REALM}?service=${SERVICE}&scope=${SCOPE}" -s 2>/dev/null | jq -r .token | xargs echo)
             fi 
-            console "${DOCKER_TOKEN}"
+            console "${DOCKER_AUTH_TOKEN}"
         fi
-        console "${DETAILS}"
     fi
 
-    curl -H "Authorization: ${TYPE} ${DOCKER_TOKEN}" "${@}"
+    curl -H "Authorization: ${DOCKER_AUTH_TYPE} ${DOCKER_AUTH_TOKEN}" "${@}"
 }
 
 main "${@}"
