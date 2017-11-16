@@ -32,17 +32,12 @@ job could be:
 ```yaml
 cleanup:broken-build:
   stage: cleanup
-  services:
-    - docker:dind
-  image: docker:latest
-  before_script:
-    - docker info
   variables:
-    DOCKER_HOST: tcp://localhost:2375
-    DOCKER_DRIVER: overlay2
     DOCKER_REGISTRY: $CI_REGISTRY
     DOCKER_PROJECT: $CI_PROJECT_PATH
     DOCKER_TAG: $CI_COMMIT_TAG
+    DOCKER_USERNAME: $REGISTRY_USERNAME # Should be provided as a protected pipeline variable
+    DOCKER_PASSWORD: $REGISTRY_PASSWORD # Should be provided as a protected pipeline variable
   only:
     - tags
   when: on_failure
